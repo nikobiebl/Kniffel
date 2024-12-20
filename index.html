@@ -402,11 +402,23 @@
         function updateLeaderboardDisplay() {
             const leaderboardElement = document.getElementById('leaderboard');
             leaderboardElement.innerHTML = '';
-            leaderboard.forEach(entry => {
+
+            leaderboard.forEach((entry, index) => {
                 const listItem = document.createElement('li');
-                listItem.textContent = `${entry.name}: ${entry.score} Punkte`;
+                listItem.innerHTML = `
+                    ${entry.name}: ${entry.score} Punkte
+                    <button onclick="deleteLeaderboardEntry(${index})">Löschen</button>
+                `;
                 leaderboardElement.appendChild(listItem);
             });
+        }
+
+        function deleteLeaderboardEntry(index) {
+            if (confirm("Möchtest du diesen Eintrag wirklich löschen?")) {
+                leaderboard.splice(index, 1); // Entfernt den Eintrag aus der Liste
+                localStorage.setItem('leaderboard', JSON.stringify(leaderboard)); // Speichert die aktualisierte Liste
+                updateLeaderboardDisplay(); // Aktualisiert die Anzeige
+            }
         }
 
         function endGame() {
