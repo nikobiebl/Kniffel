@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kniffel Spiel</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+        }
+        .dice {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .die {
+            width: 50px;
+            height: 50px;
+            margin: 0 5px;
+            border: 2px solid #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5em;
+            background-color: #f9f9f9;
+            cursor: pointer;
+        }
+        .die.saved {
+            background-color: #cfc;
+        }
+        .buttons {
+            margin: 20px 0;
+        }
+        table {
+            margin: 20px auto;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #000;
+            padding: 10px;
+        }
+        td {
+            width: 100px;
+            height: 25px;
+            text-align: center;
+            position: relative;
+        }
+        th {
+            background-color: #ddd;
+        }
+        .total {
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        .bonus {
+            color: green;
+            font-weight: bold;
+        }
+        .eintragen {
+            opacity: 0;
+            pointer-events: auto;
+        }
+        .bestenliste {
+            margin-top: 30px;
+        }
+        .bestenliste ol {
+            text-align: left;
+            margin: 0 auto;
+            max-width: 200px;
+        }
+    </style>
+</head>
+<body onload="resetDice(); updateLeaderboardDisplay();">
+    <h1>Kniffel Spiel</h1>
+    <div>
+        <label for="playerName">Spielername:</label>
+        <input type="text" id="playerName" placeholder="Name eingeben">
+    </div>
+    <div class="dice" id="dice">
+        <div class="die" id="die1" onclick="toggleSave(1)"></div>
+        <div class="die" id="die2" onclick="toggleSave(2)"></div>
+        <div class="die" id="die3" onclick="toggleSave(3)"></div>
+        <div class="die" id="die4" onclick="toggleSave(4)"></div>
+        <div class="die" id="die5" onclick="toggleSave(5)"></div>
+    </div>
+    <div class="buttons">
+        <button onclick="rollDice()" id="rollButton">Würfeln</button>
+        <button onclick="undoLastScore()" id="undoButton" disabled>Letzten Eintrag zurücknehmen</button>
+        <button onclick="endGame()">Spiel Beenden</button>
+        <p>Verbleibende Würfe: <span id="rollsLeft">3</span></p>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Kategorie</th>
+                <th>Punkte</th>
+            </tr>
+        </thead>
+        <tbody id="upperSection">
+            <tr>
+                <td>Einsen</td>
+                <td id="Einsen"><button onclick="setScore('Einsen', this)" class="eintragen">Eintragen</button></td>
+            </tr>
+            <tr>
+                <td>Zweien</td>
+                <td id="Zweien"><button onclick="setScore('Zweien', this)" class="eintragen">Eintragen</button></td>
+            </tr>
+            <tr>
+                <td>Dreien</td>
+                <td id="Dreien"><button onclick="setScore('Dreien', this)" class="eintragen">Eintragen</button></td>
+            </tr>
+            <tr>
+                <td>Vieren</td>
+                <td id="Vieren"><button onclick="setScore('Vieren', this)" class="eintragen">Eintragen</button></td>
+            </tr>
+            <tr>
+                <td>Fünfen</td>
+                <td id="Fünfen"><button onclick="setScore('Fünfen', this)" class="eintragen">Eintragen</button></td>
+            </tr>
+            <tr>
+                <td>Sechsen</td>
+                <td id="Sechsen"><button onclick="setScore('Sechsen', this)" class="eintragen">Eintragen</button></td>
+            </tr>
+        </tbody>
+    </table>
+    <div class="total">
+        Zwischenergebnis (Oberer Teil): <span id="upperTotal">0</span>
+        <p class="bonus">35-Punkte-Bonus bei mindestens 63 Punkten: <span id="bonus">0</span></p>
+        <p>Zwischenergebnis nach Bonus: <span id="upperTotalWithBonus">0</span></p>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Kategorie</th>
+                <th>Punkte</th>
+            </tr>
+        </thead>
+        <tbody id="lowerSection">
+            <tr>
+                <td>Dreierpasch</td>
+                <td id="Dreierpasch"><button onclick="setScore('Dreierpasch', this)" class="eintragen">Eintragen</button></td>
+            </tr>
+            <tr>
+                <td>Viererpasch</td>
+                <td id="Viererpasch"><button onclick="setScore('Viererpasch', this)" class="eintragen">Eintragen</button></td>
+            </tr>
+            <tr>
+                <td>Full House</td>
+                <td id="Full House"><button onclick="setScore('Full House', this)" class="eintragen">Eintragen</button></td>
+            </tr>
+            <tr>
+                <td>Kleine Straße</td>
+                <td id="Kleine Straße"><button onclick="setScore('Kleine Straße', this)" class="eintragen">Eintragen</button></td>
+            </tr>
+            <tr>
+                <td>Große Straße</td>
+                <td id="Große Straße"><button onclick="setScore('Große Straße', this)" class="eintragen">Eintragen</button></td>
+            </tr>
+            <tr>
+                <td>Kniffel</td>
+                <td id="Kniffel"><button onclick="setScore('Kniffel', this)" class="eintragen">Eintragen</button></td>
+            </tr>
+            <tr>
+                <td>Chance</td>
+                <td id="Chance"><button onclick="setScore('Chance', this)" class="eintragen">Eintragen</button></td>
+            </tr>
+        </tbody>
+    </table>
+    <div class="total">
+        Zwischenergebnis (Unterer Teil): <span id="lowerTotal">0</span>
+    </div>
+    <div class="total">
+        Gesamtergebnis: <span id="totalScore">0</span>
+    </div>
+    <div class="bestenliste">
+        <h2>Bestenliste</h2>
+        <ol id="leaderboard"></ol>
+    </div>
+    <script>
+        let rollsLeft = 3;
+        let totalScore = 0;
+        let upperTotal = 0;
+        let upperTotalWithBonus = 0;
+        let lowerTotal = 0;
+        let lastEntry = null;
+        let savedDiceValues = [];
+        const savedDice = [false, false, false, false, false];
+
+        // Bestenliste im localStorage speichern
+        let leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
+
+        function rollDice() {
+            if (rollsLeft > 0) {
+                for (let i = 1; i <= 5; i++) {
+                    if (!savedDice[i - 1]) {
+                        const die = document.getElementById(`die${i}`);
+                        die.textContent = Math.floor(Math.random() * 6) + 1;
+                    }
+                }
+                rollsLeft--;
+                document.getElementById('rollsLeft').textContent = rollsLeft;
+                if (rollsLeft === 0) {
+                    document.getElementById('rollButton').disabled = true;
+                }
+            }
+        }
+
+        function toggleSave(dieIndex) {
+            const die = document.getElementById(`die${dieIndex}`);
+            if (die.textContent === "") return;
+
+            savedDice[dieIndex - 1] = !savedDice[dieIndex - 1];
+            if (savedDice[dieIndex - 1]) {
+                die.classList.add('saved');
+            } else {
+                die.classList.remove('saved');
+            }
+        }
+
+        function calculateScore(category) {
+            const diceValues = Array.from({ length: 5 }, (_, i) =>
+                parseInt(document.getElementById(`die${i + 1}`).textContent || 0)
+            );
+            let score = 0;
+
+            switch (category) {
+                case 'Einsen':
+                    score = diceValues.filter(v => v === 1).reduce((a, b) => a + b, 0);
+                    break;
+                case 'Zweien':
+                    score = diceValues.filter(v => v === 2).reduce((a, b) => a + b, 0);
+                    break;
+                case 'Dreien':
+                    score = diceValues.filter(v => v === 3).reduce((a, b) => a + b, 0);
+                    break;
+                case 'Vieren':
+                    score = diceValues.filter(v => v === 4).reduce((a, b) => a + b, 0);
+                    break;
+                case 'Fünfen':
+                    score = diceValues.filter(v => v === 5).reduce((a, b) => a + b, 0);
+                    break;
+                case 'Sechsen':
+                    score = diceValues.filter(v => v === 6).reduce((a, b) => a + b, 0);
+                    break;
+                case 'Dreierpasch':
+                    if (diceValues.some(v => diceValues.filter(d => d === v).length >= 3)) {
+                        score = diceValues.reduce((a, b) => a + b, 0);
+                    }
+                    break;
+                case 'Viererpasch':
+                    if (diceValues.some(v => diceValues.filter(d => d === v).length >= 4)) {
+                        score = diceValues.reduce((a, b) => a + b, 0);
+                    }
+                    break;
+                case 'Full House':
+                    const uniqueValues = [...new Set(diceValues)];
+                    if (
+                        uniqueValues.length === 2 &&
+                        (diceValues.filter(v => v === uniqueValues[0]).length === 3 ||
+                            diceValues.filter(v => v === uniqueValues[1]).length === 3)
+                    ) {
+                        score = 25;
+                    }
+                    break;
+                case 'Kleine Straße':
+                    if ([1, 2, 3, 4].every(v => diceValues.includes(v)) ||
+                        [2, 3, 4, 5].every(v => diceValues.includes(v)) ||
+                        [3, 4, 5, 6].every(v => diceValues.includes(v))) {
+                        score = 30;
+                    }
+                    break;
+                case 'Große Straße':
+                    if ([1, 2, 3, 4, 5].every(v => diceValues.includes(v)) ||
+                        [2, 3, 4, 5, 6].every(v => diceValues.includes(v))) {
+                        score = 40;
+                    }
+                    break;
+                case 'Kniffel':
+                    if (diceValues.every(v => v === diceValues[0])) {
+                        score = 50;
+                    }
+                    break;
+                case 'Chance':
+                    score = diceValues.reduce((a, b) => a + b, 0);
+                    break;
+            }
+
+            return score;
+        }
+
+        function setScore(category, button) {
+            const score = calculateScore(category);
+            const categoryCell = document.getElementById(category);
+
+            if (categoryCell && button) {
+                savedDiceValues = Array.from({ length: 5 }, (_, i) => document.getElementById(`die${i + 1}`).textContent);
+                lastEntry = { category, score, button: button.parentElement.innerHTML };
+                button.parentElement.innerHTML = score;
+
+                if (["Einsen", "Zweien", "Dreien", "Vieren", "Fünfen", "Sechsen"].includes(category)) {
+                    upperTotal += score;
+                    document.getElementById('upperTotal').textContent = upperTotal;
+                    checkBonus();
+                } else {
+                    lowerTotal += score;
+                    document.getElementById('lowerTotal').textContent = lowerTotal;
+                }
+
+                updateTotalScore();
+                document.getElementById('undoButton').disabled = false;
+                resetDice();
+            }
+        }
+
+        function checkBonus() {
+            const bonusElement = document.getElementById('bonus');
+            if (upperTotal >= 63) {
+                bonusElement.textContent = 35;
+                upperTotalWithBonus = upperTotal + 35;
+            } else {
+                bonusElement.textContent = 0;
+                upperTotalWithBonus = upperTotal;
+            }
+            document.getElementById('upperTotalWithBonus').textContent = upperTotalWithBonus;
+        }
+
+        function updateTotalScore() {
+            totalScore = upperTotalWithBonus + lowerTotal;
+            document.getElementById('totalScore').textContent = totalScore;
+        }
+
+        function undoLastScore() {
+            if (lastEntry) {
+                const { category, score, button } = lastEntry;
+                document.getElementById(category).innerHTML = button;
+                if (["Einsen", "Zweien", "Dreien", "Vieren", "Fünfen", "Sechsen"].includes(category)) {
+                    upperTotal -= score;
+                    document.getElementById('upperTotal').textContent = upperTotal;
+                    checkBonus();
+                } else {
+                    lowerTotal -= score;
+                    document.getElementById('lowerTotal').textContent = lowerTotal;
+                }
+                updateTotalScore();
+                for (let i = 1; i <= 5; i++) {
+                    const die = document.getElementById(`die${i}`);
+                    die.textContent = savedDiceValues[i - 1];
+                }
+                lastEntry = null;
+                document.getElementById('undoButton').disabled = true;
+
+                rollsLeft = 0;
+                document.getElementById('rollsLeft').textContent = rollsLeft;
+                document.getElementById('rollButton').disabled = true;
+            }
+        }
+
+        function resetDice() {
+            rollsLeft = 3;
+            document.getElementById('rollsLeft').textContent = rollsLeft;
+            document.getElementById('rollButton').disabled = false;
+            savedDice.fill(false);
+            for (let i = 1; i <= 5; i++) {
+                const die = document.getElementById(`die${i}`);
+                die.textContent = "";
+                die.classList.remove('saved');
+            }
+        }
+
+        function resetGame() {
+            upperTotal = 0;
+            upperTotalWithBonus = 0;
+            lowerTotal = 0;
+            totalScore = 0;
+
+            document.getElementById('upperTotal').textContent = upperTotal;
+            document.getElementById('bonus').textContent = 0;
+            document.getElementById('upperTotalWithBonus').textContent = upperTotalWithBonus;
+            document.getElementById('lowerTotal').textContent = lowerTotal;
+            document.getElementById('totalScore').textContent = totalScore;
+
+            const fields = [...document.querySelectorAll('td[id]')];
+            fields.forEach(field => {
+                field.innerHTML = '<button onclick="setScore(\'' + field.id + '\', this)" class="eintragen">Eintragen</button>';
+            });
+
+            resetDice();
+            lastEntry = null;
+            document.getElementById('undoButton').disabled = true;
+        }
+
+        function addToLeaderboard(name, score) {
+            leaderboard.push({ name, score });
+            leaderboard.sort((a, b) => b.score - a.score);
+            leaderboard = leaderboard.slice(0, 10);
+            localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
+            updateLeaderboardDisplay();
+        }
+
+        function updateLeaderboardDisplay() {
+            const leaderboardElement = document.getElementById('leaderboard');
+            leaderboardElement.innerHTML = '';
+            leaderboard.forEach(entry => {
+                const listItem = document.createElement('li');
+                listItem.textContent = `${entry.name}: ${entry.score} Punkte`;
+                leaderboardElement.appendChild(listItem);
+            });
+        }
+
+        function endGame() {
+            const playerName = document.getElementById('playerName').value.trim() || 'Unbekannt';
+            addToLeaderboard(playerName, totalScore);
+            alert(`Spiel beendet! ${playerName} hat ${totalScore} Punkte erreicht.`);
+            resetDice();
+            resetGame();
+        }
+    </script>
+</body>
+</html>
