@@ -191,6 +191,8 @@
         // Bestenliste im localStorage speichern
         let leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
 
+        let hasRolled = false; // Prüft, ob gewürfelt wurde
+
         function rollDice() {
             if (rollsLeft > 0) {
                 for (let i = 1; i <= 5; i++) {
@@ -200,6 +202,7 @@
                     }
                 }
                 rollsLeft--;
+                hasRolled = true; // Markiere, dass gewürfelt wurde
                 document.getElementById('rollsLeft').textContent = rollsLeft;
                 if (rollsLeft === 0) {
                     document.getElementById('rollButton').disabled = true;
@@ -291,6 +294,11 @@
         }
 
         function setScore(category, button) {
+            if (!hasRolled) { // Prüfen, ob gewürfelt wurde
+            alert("Du musst erst würfeln, bevor du ein Feld eintragen kannst!");
+            return; // Beende die Funktion, wenn nicht gewürfelt wurde
+            }
+            
             const score = calculateScore(category);
             const categoryCell = document.getElementById(category);
 
@@ -362,6 +370,8 @@
             document.getElementById('rollsLeft').textContent = rollsLeft;
             document.getElementById('rollButton').disabled = false;
             savedDice.fill(false);
+            hasRolled = false; // Zurücksetzen des Roll-Status
+            
             for (let i = 1; i <= 5; i++) {
                 const die = document.getElementById(`die${i}`);
                 die.textContent = "";
