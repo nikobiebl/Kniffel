@@ -278,11 +278,9 @@
                     }
                     break;
                 case 'Kniffel':
-                    if (diceValues.every(v => v === diceValues[0] && diceValues[0] !== 0)) {
+                    if (diceValues.every(v => v === diceValues[0])) {
                         score = 50;
-                    } else {
-                        score = 0; // Optional: Setze die Punktzahl auf 0, falls kein Kniffel vorliegt
-                    }
+                    } 
                     break;
                 case 'Chance':
                     score = diceValues.reduce((a, b) => a + b, 0);
