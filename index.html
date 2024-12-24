@@ -320,7 +320,6 @@
                 }
 
                 updateTotalScore();
-                document.getElementById('undoButton').disabled = false;
                 resetDice();
                 hasRolled = false;
                 allowUndo = true; // Rücknahme nach Eintrag erlauben
@@ -363,6 +362,8 @@
                     die.textContent = savedDiceValues[i - 1];
                 }
                 lastEntry = null;
+                hasRolled = true; // Spieler darf erneut eintragen
+                allowUndo = false; // Rücknahme deaktivieren
                 document.getElementById('undoButton').disabled = true;
 
                 rollsLeft = 0;
