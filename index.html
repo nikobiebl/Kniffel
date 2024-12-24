@@ -192,6 +192,7 @@
         let leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
 
         let hasRolled = false; // Prüft, ob gewürfelt wurde
+        let allowUndo = true; // Gibt an, ob der letzte Eintrag zurückgenommen werden darf
 
         function rollDice() {
             if (rollsLeft > 0) {
@@ -203,6 +204,7 @@
                 }
                 rollsLeft--;
                 hasRolled = true; // Markiere, dass gewürfelt wurde
+                allowUndo = false; // Rücknahme des letzten Eintrags deaktivieren
                 document.getElementById('rollsLeft').textContent = rollsLeft;
                 if (rollsLeft === 0) {
                     document.getElementById('rollButton').disabled = true;
@@ -319,6 +321,8 @@
                 updateTotalScore();
                 document.getElementById('undoButton').disabled = false;
                 resetDice();
+                hasRolled = false;
+                allowUndo = true; // Rücknahme nach Eintrag erlauben
             }
         }
 
@@ -340,6 +344,11 @@
         }
 
         function undoLastScore() {
+            if (!allowUndo) {
+            alert("Du kannst den letzten Eintrag nicht zurücknehmen, da du bereits erneut gewürfelt hast!");
+            return;
+            }
+            
             if (lastEntry) {
                 const { category, score, button } = lastEntry;
                 document.getElementById(category).innerHTML = button;
@@ -371,6 +380,7 @@
             document.getElementById('rollButton').disabled = false;
             savedDice.fill(false);
             hasRolled = false; // Zurücksetzen des Roll-Status
+            allowUndo = false; // Rücknahme deaktivieren
             
             for (let i = 1; i <= 5; i++) {
                 const die = document.getElementById(`die${i}`);
